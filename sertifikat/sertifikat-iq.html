@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sertifikat IQ – Lidan Psikologi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: Arial, sans-serif;
+    background: #1a1a2e;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 16px;
+}
+
+/* ── Loading ── */
+#loading-screen {
+    position: fixed; inset: 0;
+    background: rgba(26,26,46,0.97);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999; color: white; gap: 14px;
+}
+.spinner {
+    width: 46px; height: 46px;
+    border: 4px solid rgba(255,255,255,.2);
+    border-top-color: #9c4dcc;
+    border-radius: 50%;
+    animation: spin .75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading-screen.hidden { display: none; }
+
+/* ── Print button ── */
+.print-bar {
+    display: flex; gap: 10px; margin-bottom: 20px;
+}
+.print-btn {
+    padding: 9px 22px; border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: all .2s;
+}
+.print-btn-primary { background: #9c4dcc; color: white; }
+.print-btn-primary:hover { background: #7b3aa0; }
+.print-btn-secondary { background: #333; color: #ccc; border: 1px solid #555; }
+.print-btn-secondary:hover { background: #444; }
+
+/* ══════════════════════════════════
+   SERTIFIKAT
+══════════════════════════════════ */
+.cert-wrap {
+    width: 794px;
+    background: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+
+/* Dekorasi sudut hitam */
+.cert-corner {
+    position: absolute;
+    width: 180px; height: 180px;
+    background: #1a1a1a;
+    z-index: 0;
+}
+.cert-corner.tl { top: 0; left: 0; clip-path: polygon(0 0, 60% 0, 0 60%); }
+.cert-corner.tr { top: 0; right: 0; clip-path: polygon(40% 0, 100% 0, 100% 60%); }
+.cert-corner.bl { bottom: 0; left: 0; clip-path: polygon(0 40%, 60% 100%, 0 100%); }
+.cert-corner.br { bottom: 0; right: 0; clip-path: polygon(100% 40%, 100% 100%, 40% 100%); }
+
+/* Inner content */
+.cert-inner {
+    position: relative; z-index: 1;
+    padding: 40px 60px 36px;
+    border: 8px solid #d4a800;
+    margin: 18px;
+}
+
+/* Header */
+.cert-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 10px;
+}
+.cert-logo {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 3px solid #9c4dcc;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.cert-title-block { text-align: center; }
+.cert-title-main {
+    font-size: 32px; font-weight: 900;
+    color: #1a1a1a; letter-spacing: 2px;
+    text-transform: uppercase; line-height: 1.1;
+}
+.cert-title-sub {
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 6px; color: #555;
+    text-transform: uppercase; margin-top: 3px;
+}
+
+/* Divider */
+.cert-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4a800, #9c4dcc, #d4a800, transparent);
+    margin: 14px 0;
+}
+
+/* Diberikan kepada */
+.cert-kepada {
+    text-align: center;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 3px; color: #777;
+    text-transform: uppercase; margin-bottom: 6px;
+}
+.cert-nama {
+    text-align: center;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 42px; font-style: italic;
+    color: #1a1a1a; line-height: 1.1;
+    margin-bottom: 10px;
+    /* Efek signature */
+    background: linear-gradient(135deg, #2c1654, #9c4dcc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Sub text */
+.cert-sub {
+    text-align: center;
+    font-size: 14px; color: #444; margin-bottom: 6px;
+}
+
+/* Score IQ */
+.cert-score {
+    text-align: center;
+    font-size: 28px; font-weight: 900;
+    color: #1a1a1a; margin: 6px 0 14px;
+    letter-spacing: 1px;
+}
+.cert-score span {
+    color: #9c4dcc;
+}
+
+/* Footer baris: QR + Tanggal + TTD */
+.cert-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: 10px;
+    gap: 20px;
+}
+
+/* QR */
+.cert-qr { flex-shrink: 0; }
+.cert-qr-label {
+    font-size: 9px; color: #999; text-align: center;
+    margin-top: 4px;
+}
+
+/* TTD tengah */
+.cert-ttd {
+    flex: 1;
+    text-align: center;
+}
+.cert-ttd-label {
+    font-size: 12px; font-weight: 700; margin-bottom: 4px;
+}
+.cert-ttd-img {
+    height: 60px; max-width: 150px; object-fit: contain;
+    display: block; margin: 0 auto 4px;
+}
+.cert-ttd-stempel {
+    width: 80px; height: 80px;
+    margin: -10px auto 0;
+    display: block;
+    opacity: .9;
+}
+.cert-ttd-nama {
+    font-size: 12px; font-weight: 900;
+    color: #1a1a1a; margin-top: 4px;
+}
+.cert-ttd-sipp {
+    font-size: 10px; color: #555;
+}
+
+/* Tanggal kanan */
+.cert-tanggal-wrap {
+    text-align: right; flex-shrink: 0;
+    font-size: 12px; color: #555;
+    min-width: 140px;
+}
+.cert-tanggal-val {
+    font-weight: 700; color: #1a1a1a; font-size: 13px;
+}
+
+/* Dekorasi dots pojok dalam */
+.cert-dots {
+    position: absolute;
+    width: 100px; height: 100px;
+    opacity: .12;
+}
+.cert-dots.tl { top: 30px; left: 30px; }
+.cert-dots.br { bottom: 30px; right: 30px; transform: rotate(180deg); }
+
+@media print {
+    body { background: white; padding: 0; }
+    .print-bar { display: none; }
+    .cert-wrap { box-shadow: none; width: 100%; }
+}
+
+@media (max-width: 860px) {
+    .cert-wrap { width: 100%; }
+    .cert-inner { padding: 24px 20px; margin: 10px; }
+    .cert-nama { font-size: 28px; }
+    .cert-title-main { font-size: 22px; }
+    .cert-score { font-size: 20px; }
+    .cert-footer { flex-direction: column; align-items: center; }
+    .cert-tanggal-wrap { text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-screen">
+    <div class="spinner"></div>
+    <p style="font-size:15px;font-weight:600;">Memuat sertifikat...</p>
+</div>
+
+<!-- Print bar -->
+<div class="print-bar" id="printBar">
+    <button class="print-btn print-btn-primary" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+    <button class="print-btn print-btn-secondary" onclick="history.back()">← Kembali</button>
+</div>
+
+<!-- Sertifikat -->
+<div class="cert-wrap" id="certWrap">
+
+    <!-- Sudut hitam dekorasi -->
+    <div class="cert-corner tl"></div>
+    <div class="cert-corner tr"></div>
+    <div class="cert-corner bl"></div>
+    <div class="cert-corner br"></div>
+
+    <!-- Dots dekorasi -->
+    <svg class="cert-dots tl" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <pattern id="dots" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+            <circle cx="5" cy="5" r="1.5" fill="#9c4dcc"/>
+        </pattern>
+        <rect width="100" height="100" fill="url(#dots)"/>
+    </svg>
+    <svg class="cert-dots br" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <pattern id="dots2" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+            <circle cx="5" cy="5" r="1.5" fill="#9c4dcc"/>
+        </pattern>
+        <rect width="100" height="100" fill="url(#dots2)"/>
+    </svg>
+
+    <div class="cert-inner">
+
+        <!-- Header -->
+        <div class="cert-header">
+            <img src="https://psikogram.lidan.co.id/gambar/logo1.png" alt="Logo Lidan" class="cert-logo">
+            <div class="cert-title-block">
+                <div class="cert-title-main">Intelligence Quotient</div>
+                <div class="cert-title-sub">Certificate</div>
+            </div>
+        </div>
+
+        <div class="cert-divider"></div>
+
+        <!-- Nama -->
+        <div class="cert-kepada">Diberikan Kepada</div>
+        <div class="cert-nama" id="cert-nama">—</div>
+
+        <!-- Sub -->
+        <div class="cert-sub">Telah mengikuti Tes Inteligensi/IQ di Lidan Psikologi</div>
+
+        <!-- Score -->
+        <div class="cert-score" id="cert-score">score IQ = <span>—</span></div>
+
+        <div class="cert-divider"></div>
+
+        <!-- Footer: QR | TTD | Tanggal -->
+        <div class="cert-footer">
+
+            <!-- QR Code -->
+            <div class="cert-qr">
+                <div id="cert-qr-code"></div>
+                <div class="cert-qr-label">Scan untuk verifikasi</div>
+            </div>
+
+            <!-- Tanda Tangan -->
+            <div class="cert-ttd">
+                <div class="cert-ttd-label">Psikolog</div>
+                <img src="https://psikogram.lidan.co.id/gambar/ttd.png" alt="TTD" class="cert-ttd-img"
+                     onerror="this.style.height='50px'">
+                <img src="https://psikogram.lidan.co.id/gambar/stempel.png" alt="Stempel" class="cert-ttd-stempel"
+                     onerror="this.style.display='none'">
+                <div class="cert-ttd-nama">Dr. Karina Meriem Beru Brahmana, M.Psi, Psikolog</div>
+                <div class="cert-ttd-sipp">No. SIPP 20070136-2021-02-0799</div>
+            </div>
+
+            <!-- Tanggal -->
+            <div class="cert-tanggal-wrap">
+                <div style="margin-bottom:4px;">Medan,</div>
+                <div class="cert-tanggal-val" id="cert-tanggal">—</div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+// ── Config ──
+const CONFIG = {
+    API_URL    : 'https://lidan-co-id.pages.dev/api/db_psikogram1',
+    TABLE_NAME : (new URLSearchParams(window.location.search).get('tabel')) || 'rekap_nilai1',
+    API_SECRET : 'admin'
+};
+
+function getParamsFromUrl() {
+    const p = new URLSearchParams(window.location.search);
+    return { id_x: p.get('id_x'), x_01: p.get('x_01') };
+}
+
+async function fetchData(id_x) {
+    const url = `${CONFIG.API_URL}?table=${CONFIG.TABLE_NAME}&id_x=${id_x}`;
+    const res = await fetch(url, { headers: { 'X-Custom-Auth': CONFIG.API_SECRET } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || 'Data tidak ditemukan');
+    const d = json.data;
+    return Array.isArray(d) ? d[0] : d;
+}
+
+function getKategoriIQ(iq) {
+    if (iq <= 69)  return 'Mental Defective';
+    if (iq <= 79)  return 'Borderline';
+    if (iq <= 89)  return 'Rata-rata Bawah';
+    if (iq <= 109) return 'Rata-rata';
+    if (iq <= 119) return 'Di Atas Rata-rata';
+    if (iq <= 129) return 'Superior';
+    if (iq <= 139) return 'Sangat Superior';
+    return 'Genius';
+}
+
+function formatTanggal(str) {
+    if (!str) return '—';
+    const d = new Date(str);
+    if (isNaN(d)) return str;
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function renderCert(row) {
+    const safeJSON = (s, f) => { try { return JSON.parse(s || '{}'); } catch { return f; } };
+    const bio   = safeJSON(row.x_02, {});
+    const iq    = parseInt(row.x_06) || 0;
+    const nama  = bio.nama || '—';
+    const tgl   = formatTanggal(bio.tanggal || row.x_11 || '');
+    const kat   = getKategoriIQ(iq);
+
+    // Isi elemen
+    document.getElementById('cert-nama').textContent    = nama;
+    document.getElementById('cert-tanggal').textContent = tgl;
+    document.getElementById('cert-score').innerHTML     = `score IQ = <span>${iq} (${kat})</span>`;
+
+    // QR Code → menuju laporan.lidan.co.id/sertifikat
+    const qrUrl = `https://laporan.lidan.co.id/sertifikat/?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}`;
+    new QRCode(document.getElementById('cert-qr-code'), {
+        text: qrUrl,
+        width: 80, height: 80,
+        colorDark: '#1a1a1a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+    });
+}
+
+async function main() {
+    const { id_x, x_01 } = getParamsFromUrl();
+
+    if (!id_x) {
+        document.getElementById('loading-screen').innerHTML = `
+            <div style="color:white;font-size:16px;text-align:center;padding:30px;">
+                ⚠️ Parameter <code>id_x</code> tidak ditemukan di URL.<br><br>
+                Contoh: <code>sertifikat-iq.html?id_x=1</code>
+            </div>`;
+        return;
+    }
+
+    try {
+        const row = await fetchData(id_x);
+
+        if (x_01 && String(row.x_01) !== String(x_01)) {
+            throw new Error('Akses ditolak: token tidak valid.');
+        }
+
+        renderCert(row);
+        document.getElementById('loading-screen').classList.add('hidden');
+
+    } catch(err) {
+        document.getElementById('loading-screen').innerHTML = `
+            <div style="color:white;font-size:16px;text-align:center;padding:30px;">
+                ⚠️ Gagal memuat sertifikat.<br><br>
+                <code style="font-size:13px;">${err.message}</code><br><br>
+                <button onclick="location.reload()"
+                    style="margin-top:14px;padding:9px 22px;background:#9c4dcc;color:white;
+                    border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">
+                    ↻ Coba Lagi
+                </button>
+            </div>`;
+    }
+}
+
+main();
+</script>
+</body>
+</html>
