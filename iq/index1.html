@@ -123,18 +123,6 @@
         .skor-c  { background: #fff3cd; color: #856404; }  /* 5-6  Cukup  */
         .skor-b  { background: #cce5ff; color: #004085; }  /* 7-8  Baik   */
         .skor-bs { background: #d4edda; color: #155724; }  /* 9-10 Baik Sekali */  /* 9-10 Baik Sekali */
-
-        /* --- Keterangan Psikologis --- */
-        #narasi-section {
-            display: none;
-            margin-top: 16px;
-            padding: 14px 16px;
-            background: #f0edff;
-            border-left: 4px solid #5F4EDA;
-            border-radius: 6px;
-        }
-        #narasi-section strong { color: #5F4EDA; font-size: 14px; }
-        #narasi-text { margin: 8px 0 0 0; text-align: justify; line-height: 1.8; font-size: inherit; }
     </style>
 </head>
 <body>
@@ -226,12 +214,6 @@
             <ul class="custom-list" style="margin-top:4px;">
                 <li>Intelligence Quotient / IQ = <span id="span-iq"></span></li>
             </ul>
-        </div>
-
-        <!-- Keterangan Psikologis (x_12) -->
-        <div id="narasi-section">
-            <strong>&#128221; Keterangan Psikologis:</strong>
-            <p id="narasi-text"></p>
         </div>
 
         <!-- Tanda Tangan -->
@@ -412,18 +394,6 @@ function skorLabel(s) {
 }
 
 // =========================================================
-// TAMPILKAN NARASI (x_12)
-// =========================================================
-function tampilkanNarasi(teks) {
-    if (teks && teks.trim()) {
-        document.getElementById('narasi-text').textContent = teks;
-        document.getElementById('narasi-section').style.display = 'block';
-    } else {
-        document.getElementById('narasi-section').style.display = 'none';
-    }
-}
-
-// =========================================================
 // MAIN
 // =========================================================
 async function main() {
@@ -454,9 +424,6 @@ async function main() {
         // Parse & render
         const parsed = parseRekapData(rawData);
         renderPage(parsed);
-
-        // Tampilkan narasi x_12 jika ada
-        tampilkanNarasi(rawData.x_12 || '');
 
         document.getElementById('loading-screen').classList.add('hidden');
 
