@@ -229,9 +229,9 @@
         </div>
 
         <!-- Keterangan Psikologis (x_12) -->
-        <div id="narasi-section" style="display:none; margin-top:16px; padding:14px 16px; background:#f0edff; border-left:4px solid #5F4EDA; border-radius:6px;">
-            <strong style="color:#5F4EDA; font-size:14px;">&#128221; Keterangan Psikologis:</strong>
-            <p id="narasi-text" style="margin:8px 0 0 0; text-align:justify; line-height:1.8; font-size:inherit; display:block;"></p>
+        <div id="narasi-section">
+            <strong>&#128221; Keterangan Psikologis:</strong>
+            <p id="narasi-text"></p>
         </div>
 
         <!-- Tanda Tangan -->
@@ -416,13 +416,7 @@ function skorLabel(s) {
 // =========================================================
 function tampilkanNarasi(teks) {
     if (teks && teks.trim()) {
-        const el = document.getElementById('narasi-text');
-        // Cek apakah konten mengandung HTML tag
-        if (/<[a-z][\s\S]*>/i.test(teks)) {
-            el.innerHTML = teks;
-        } else {
-            el.textContent = teks;
-        }
+        document.getElementById('narasi-text').textContent = teks;
         document.getElementById('narasi-section').style.display = 'block';
     } else {
         document.getElementById('narasi-section').style.display = 'none';
