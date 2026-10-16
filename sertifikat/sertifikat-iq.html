@@ -317,6 +317,11 @@ const CFG={
   TABLE_NAME:(new URLSearchParams(window.location.search).get('tabel'))||'rekap_nilai1',
   API_SECRET:'admin'
 };
+function toTitleCase(str) {
+    return String(str || '').trim().replace(/\s+/g, ' ').toLowerCase()
+        .replace(/(^|[\s.'-])([a-z])/g, (m, sep, huruf) => sep + huruf.toUpperCase());
+}
+
 function kat(n){if(n<=69)return'Mental Defective';if(n<=79)return'Borderline';if(n<=89)return'Rata-rata Bawah';if(n<=109)return'Rata-rata';if(n<=119)return'Di Atas Rata-rata';if(n<=129)return'Superior';if(n<=139)return'Sangat Superior';return'Genius'}
 function fmt(s){if(!s)return'';const d=new Date(s);if(isNaN(d))return s;return d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}
 
@@ -390,7 +395,7 @@ async function main(){
     if(String(row.x_01)!==String(tok))throw new Error('Akses ditolak.');
     const bio=(()=>{try{return JSON.parse(row.x_02||'{}')}catch{return{}}})();
     const iq=parseInt(row.x_06)||0;
-    document.getElementById('cert-nama').textContent=bio.nama||'—';
+    document.getElementById('cert-nama').textContent=toTitleCase(bio.nama)||'—';
     document.getElementById('cert-tgl').textContent='Medan, '+(fmt(row.x_11||bio.tanggal||'')||'—');
     document.getElementById('cert-sv').textContent=`${iq} (${kat(iq)})`;
     const qrUrl=`https://laporan.lidan.co.id/sertifikat/sertifikat-iq?id_x=${row.id_x}&x_01=${encodeURIComponent(row.x_01||'')}&tabel=${encodeURIComponent(CFG.TABLE_NAME)}`;

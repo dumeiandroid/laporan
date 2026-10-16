@@ -460,6 +460,11 @@ function getKat(n) {
     return 'Genius';
 }
 
+function toTitleCase(str) {
+    return String(str || '').trim().replace(/\s+/g, ' ').toLowerCase()
+        .replace(/(^|[\s.'-])([a-z])/g, (m, sep, huruf) => sep + huruf.toUpperCase());
+}
+
 function fmt(str) {
     if (!str) return '';
     const d = new Date(str);
@@ -573,7 +578,7 @@ async function main() {
         const bio = (() => { try { return JSON.parse(row.x_02||'{}'); } catch { return {}; } })();
         const iq  = parseInt(row.x_06) || 0;
 
-        document.getElementById('cert-nama').textContent      = bio.nama || '—';
+        document.getElementById('cert-nama').textContent      = toTitleCase(bio.nama) || '—';
         document.getElementById('cert-tanggal').textContent   = 'Medan, ' + (fmt(row.x_11 || bio.tanggal || '') || '—');
         document.getElementById('cert-score-val').textContent = `${iq} (${getKat(iq)})`;
 
